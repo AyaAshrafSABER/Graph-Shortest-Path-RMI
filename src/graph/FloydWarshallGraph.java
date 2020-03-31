@@ -19,7 +19,7 @@ class FloydWarshallGraph implements Graph {
         computeShortestPaths();
     }
 
-    void computeShortestPaths() {
+    public void computeShortestPaths() {
         dist = new HashMap<>();
         HashMap<Integer, Integer> emptyMap = new HashMap<>();
         HashMap<Integer, Integer> iMap;
@@ -76,13 +76,11 @@ class FloydWarshallGraph implements Graph {
         iSet = adjacencyList.getOrDefault(i, iSet);
         iSet.add(j);
         this.adjacencyList.put(i, iSet);
-        computeShortestPaths();
     }
 
     public void deleteEdge(Integer i, Integer j) {
         if (!adjacencyList.containsKey(i)) return;
         adjacencyList.get(i).remove(j);
-        computeShortestPaths();
     }
 
     public int getShortestPath(Integer i, Integer j) {
