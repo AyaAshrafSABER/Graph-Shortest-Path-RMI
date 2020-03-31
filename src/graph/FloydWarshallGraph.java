@@ -2,7 +2,7 @@ package graph;
 
 import java.util.*;
 
-class FloydWarshallGraph implements Graph {
+public class FloydWarshallGraph implements Graph {
     final static int INF = Integer.MAX_VALUE/2;
     HashMap<Integer, HashSet<Integer>> adjacencyList;
     HashMap<Integer, HashMap<Integer, Integer>> dist;
