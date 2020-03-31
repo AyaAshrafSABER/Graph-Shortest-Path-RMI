@@ -1,4 +1,6 @@
-package Server;
+package server;
+
+import graph.Graph;
 
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;

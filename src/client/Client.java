@@ -1,12 +1,10 @@
-package Client;
+package client;
 
-import Server.GraphServant;
-import Server.GraphServer;
+import server.GraphServer;
 
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
-import java.rmi.Remote;
 import java.rmi.RemoteException;
 
 public class Client {

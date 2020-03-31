@@ -1,6 +1,6 @@
-package Server;
+package server;
 
-import Client.Operation;
+import util.operation.Operation;
 
 import java.rmi.Remote;
 import java.rmi.RemoteException;
