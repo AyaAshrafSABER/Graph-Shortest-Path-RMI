@@ -1,6 +1,8 @@
 package util.operation;
 
-public class Operation {
+import java.io.Serializable;
+
+public class Operation implements Serializable {
 //    public enum Type {READ, ADD, DEL;}
 
     public enum Type {
