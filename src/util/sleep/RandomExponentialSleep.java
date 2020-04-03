@@ -2,7 +2,7 @@ package util.sleep;
 
 import java.util.Random;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
 
 public class RandomExponentialSleep implements RandomSleep {
     private double lambda;
