@@ -1,6 +1,7 @@
 package server;
 
 import graph.FloydWarshallGraph;
+import org.apache.log4j.Logger;
 import util.operation.Operation;
 
 import java.rmi.RemoteException;
@@ -13,18 +14,23 @@ public class LazyUpdateServant extends UnicastRemoteObject implements GraphServe
     private FloydWarshallGraph graph;
     private boolean graphModified;
     private ReadWriteLock rwl = new ReentrantReadWriteLock();
+    private Logger logger;
 
-    protected LazyUpdateServant(FloydWarshallGraph graph) throws RemoteException {
+    protected LazyUpdateServant(FloydWarshallGraph graph, Logger logger) throws RemoteException {
         super();
         this.graph = graph;
         this.graphModified = false;
+        this.logger = logger;
     }
 
     @Override
     public Integer submitOperation(Operation op) throws RemoteException {
+        this.logger.info("received request: " + op.toString());
+
         if (op.getType() == Operation.Type.QUERY) {
             if (graphModified) {    // TODO: Ensure thread safety
                 rwl.writeLock().lock();
+                this.logger.info("Update triggered, reindexing shortest paths table");
                 graph.computeShortestPaths();
                 graphModified = false;
                 rwl.writeLock().unlock();
@@ -32,6 +38,7 @@ public class LazyUpdateServant extends UnicastRemoteObject implements GraphServe
             rwl.readLock().lock();
             Integer result = graph.getShortestPath(op.getOp1(), op.getOp2());
             rwl.readLock().unlock();
+            this.logger.info("read request completed successfully, returning response: " + result);
             return result;
         }
         else {      // Add/Delete operation TODO: Ensure thread safety
@@ -45,6 +52,7 @@ public class LazyUpdateServant extends UnicastRemoteObject implements GraphServe
             graphModified = true;
             rwl.writeLock().unlock();
         }
+        this.logger.info("write request completed successfully");
         return null;
     }
 

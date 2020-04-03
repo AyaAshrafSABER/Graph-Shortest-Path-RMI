@@ -1,6 +1,6 @@
 package util.sleep;
 
-import java.util.logging.Logger;
+import org.apache.log4j.Logger;
 
 public interface RandomSleep {
     public void sleep() throws InterruptedException;
