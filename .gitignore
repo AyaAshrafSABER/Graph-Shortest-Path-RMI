@@ -82,3 +82,7 @@ modules.xml
 
 .idea/*
 # End of https://www.gitignore.io/api/intellij+iml
+
+
+client-logs/
+server-logs/
