@@ -1,7 +1,6 @@
 package server;
 
 import graph.FloydWarshallGraph;
-import graph.Graph;
 import util.operation.Operation;
 
 import java.rmi.RemoteException;
@@ -10,12 +9,12 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-public class FloydWarshallGraphServant extends UnicastRemoteObject implements GraphServer {
+public class LazyUpdateServant extends UnicastRemoteObject implements GraphServer {
     private FloydWarshallGraph graph;
     private boolean graphModified;
     private ReadWriteLock rwl = new ReentrantReadWriteLock();
 
-    protected FloydWarshallGraphServant(FloydWarshallGraph graph) throws RemoteException {
+    protected LazyUpdateServant(FloydWarshallGraph graph) throws RemoteException {
         super();
         this.graph = graph;
         this.graphModified = false;

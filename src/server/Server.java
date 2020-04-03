@@ -1,14 +1,19 @@
 package server;
 
-import graph.FloydWarshallGraph;
 import graph.Graph;
+import util.parse.Parser;
 
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Scanner;
+
+import java.util.ArrayList;
+
+import static java.lang.System.exit;
 
 public class Server {
     private  Graph graph;
@@ -16,14 +21,45 @@ public class Server {
 
     }
     public static void main(String[] args) throws RemoteException {
-        HashMap<Integer, HashSet<Integer>> adjacencyList = new HashMap<>();
-        adjacencyList.put(1, new HashSet<>(Arrays.asList(2)));
-        adjacencyList.put(2, new HashSet<>(Arrays.asList(3, 4)));
-        adjacencyList.put(3, new HashSet<>(Arrays.asList(1)));
-        adjacencyList.put(4, new HashSet<>(Arrays.asList(1)));
-        FloydWarshallGraph graph = new FloydWarshallGraph(adjacencyList);
+        // default options
+        String mode = "interactive";
+        String filename = "defaultGraph.txt";
+        ArrayList<String> lines = new ArrayList<>();
+        Scanner scanner;
+        Parser parser = new Parser();
+
+        if (args.length < 1) {
+            System.err.println("The running mode should be specified!\n\t-i interactive\n\t-f read from file");
+            exit(1);
+        }
+
+        if (args[0].equals("-f")) { mode = "file"; }
+
+        if (mode.equals("file")) {
+            if (args.length > 1) {
+                filename = args[1];
+            }
+            try {
+                File file = new File(filename);
+                scanner = new Scanner(file);
+                while (scanner.hasNextLine()) {
+                    lines.add(scanner.nextLine());
+                }
+                scanner.close();
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+        } else {    // input the initial graph from the standard input.
+            scanner = new Scanner(System.in);
+            while (scanner.hasNextLine()) {
+                String line = scanner.nextLine();
+                if (line.equals("S")) { scanner.close(); break;}
+                lines.add(line);
+            }
+        }
 
         Registry registry =  LocateRegistry.createRegistry(5099);
-        registry.rebind("graphServent", new FloydWarshallGraphServant((graph)));
+//        registry.rebind("graphServant", new LazyUpdateServant((parser.constructGraph(lines))));
+        registry.rebind("graphServant", new InstantUpdateServant((parser.constructGraph(lines))));
     }
 }
