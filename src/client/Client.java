@@ -23,41 +23,45 @@ public class Client {
     private static Logger LOGGER;
 
     public static void main(String[] args) throws RemoteException, MalformedURLException, NotBoundException {
-        initLog();
+        initLogger();
         LOGGER.info("Initializing client");
 
         RandomOperationFactory factory = new RandomOperationFactory(0.5, 0.3, 0.2, 1, 20);
         Random randomGenerator = new Random();
-        RandomUniformSleep sleep = new RandomUniformSleep(1, 100);
+        RandomUniformSleep sleep = new RandomUniformSleep(1, 1000);
         int operationCount = randomGenerator.nextInt(20);
 
         LOGGER.info("Establishing connection with server");
         GraphServer service = (GraphServer) Naming.lookup("rmi://localhost:5099/graphServent");
 
         LOGGER.info("Connection successful, starting requests");
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < 20; i++) {
             Operation request = factory.getOperation();
             LOGGER.info("request sent: " + request.toString());
 
+            Integer result = service.submitOperation(request);
             if (request.getType() == Operation.Type.QUERY)
-                LOGGER.info("response: " + service.submitOperation(request));
+                LOGGER.info("response: " + result);
+
             try {
                 sleep.sleep(LOGGER);
             } catch (InterruptedException e) {
                 e.printStackTrace();
+                LOGGER.warn("InterruptedException thrown while sleeping");
             }
         }
 
         LOGGER.info("Finished all requests, exiting.");
     }
 
-    private static void initLog() {
+    private static void initLogger() {
         Random rnd = new Random();
         String dir = "client-logs";
+        System.setProperty("name", "client");
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_hh-mm-ss");
         System.setProperty("log.directory", dir);
         System.setProperty("current.date.time", dateFormat.format(new Date()));
-        System.setProperty("thread.id", String.valueOf(rnd.nextInt()));
+        System.setProperty("thread.id", "_" + String.valueOf(rnd.nextInt()));
 
         File directory = new File(dir);
         if (! directory.exists()){
