@@ -11,27 +11,22 @@ import util.parse.Parser;
 import util.sleep.RandomUniformSleep;
 
 import java.io.File;
-<<<<<<< HEAD
 import java.io.FileNotFoundException;
-=======
-
->>>>>>> 86459befee6d1c896fa255618bbbb7a1bdd15fa0
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
-<<<<<<< HEAD
 
 import java.util.ArrayList;
-=======
 import java.text.SimpleDateFormat;
 import java.util.Date;
->>>>>>> 86459befee6d1c896fa255618bbbb7a1bdd15fa0
+
 import java.util.Random;
 import java.util.Scanner;
 
 public class Client {
-<<<<<<< HEAD
+
+    private static Logger LOGGER;
 
     private static void runAuto(double pQuery, double pAdd)
             throws RemoteException, NotBoundException, MalformedURLException {
@@ -39,50 +34,24 @@ public class Client {
                 1, 20);
         Random randomGenerator = new Random();
         RandomUniformSleep sleep = new RandomUniformSleep(100, 1000);
+        LOGGER.info("Establishing connection with server");
         GraphServer service = (GraphServer) Naming.lookup("rmi://localhost:5099/graphServant");
+        LOGGER.info("Connection successful, starting requests");
         int operationCount = randomGenerator.nextInt(20);
         for (int i = 0; i < operationCount; i++) {
-            Operation op = factory.getOperation();
-            try {
-                System.out.println("Result: " + service.submitOperation(op));
-                sleep.sleep();
-            } catch (Exception e) {
-=======
-    private static Logger LOGGER;
-
-    public static void main(String[] args) throws RemoteException, MalformedURLException, NotBoundException {
-        initLogger();
-        LOGGER.info("Initializing client");
-
-        RandomOperationFactory factory = new RandomOperationFactory(0.5, 0.3, 0.2, 1, 20);
-        Random randomGenerator = new Random();
-        RandomUniformSleep sleep = new RandomUniformSleep(1, 1000);
-        int operationCount = randomGenerator.nextInt(20);
-
-        LOGGER.info("Establishing connection with server");
-        GraphServer service = (GraphServer) Naming.lookup("rmi://localhost:5099/graphServent");
-
-        LOGGER.info("Connection successful, starting requests");
-        for (int i = 0; i < 20; i++) {
             Operation request = factory.getOperation();
             LOGGER.info("request sent: " + request.toString());
-
             Integer result = service.submitOperation(request);
             if (request.getType() == Operation.Type.QUERY)
                 LOGGER.info("response: " + result);
-
             try {
                 sleep.sleep(LOGGER);
             } catch (InterruptedException e) {
->>>>>>> 86459befee6d1c896fa255618bbbb7a1bdd15fa0
-                e.printStackTrace();
                 LOGGER.warn("InterruptedException thrown while sleeping");
             }
-
         }
     }
 
-<<<<<<< HEAD
     private static void runFromFile(String filename) throws RemoteException, NotBoundException, MalformedURLException {
         ArrayList<Operation> operations;
         Parser parser = new Parser();
@@ -99,13 +68,18 @@ public class Client {
         }
         operations = parser.constructOperations(lines);
         RandomUniformSleep sleep = new RandomUniformSleep(100, 1000);
+        LOGGER.info("Establishing connection with server");
         GraphServer service = (GraphServer) Naming.lookup("rmi://localhost:5099/graphServant");
+        LOGGER.info("Connection successful, starting requests");
         for (Operation op: operations) {
+            LOGGER.info("request sent: " + op.toString());
+            Integer result = service.submitOperation(op);
+            if (op.getType() == Operation.Type.QUERY)
+                LOGGER.info("response: " + result);
             try {
-                System.out.println("Result: " + service.submitOperation(op));
-                sleep.sleep();
-            } catch (Exception e) {
-                e.printStackTrace();
+                sleep.sleep(LOGGER);
+            } catch (InterruptedException e) {
+                LOGGER.warn("InterruptedException thrown while sleeping");
             }
         }
     }
@@ -114,7 +88,9 @@ public class Client {
         Scanner scanner = new Scanner(System.in);
         RandomUniformSleep sleep = new RandomUniformSleep(100, 1000);
         Parser parser = new Parser();
+        LOGGER.info("Establishing connection with server");
         GraphServer service = (GraphServer) Naming.lookup("rmi://localhost:5099/graphServant");
+        LOGGER.info("Connection successful, starting requests");
         while (scanner.hasNextLine()) {
             String line = scanner.nextLine();
             if (line.equals("F")) {
@@ -122,16 +98,23 @@ public class Client {
                 break;
             }
             Operation op = parser.parseOperation(line);
+            LOGGER.info("request sent: " + op.toString());
+            Integer result = service.submitOperation(op);
+            if (op.getType() == Operation.Type.QUERY)
+                LOGGER.info("response: " + result);
             try {
-                System.out.println("Result: " + service.submitOperation(op));
-                sleep.sleep();
-            } catch (Exception e) {
-                e.printStackTrace();
+                sleep.sleep(LOGGER);
+            } catch (InterruptedException e) {
+                LOGGER.warn("InterruptedException thrown while sleeping");
             }
         }
     }
 
     public static void main(String[] args) throws RemoteException, NotBoundException, MalformedURLException {
+
+        initLogger();
+        LOGGER.info("Initializing client");
+
         // default options
         String mode = "auto";
         String filename = "defaultRequests.txt";
@@ -159,7 +142,6 @@ public class Client {
         } else {    // input the operations from the standard input.
                 runInteractive();
         }
-=======
         LOGGER.info("Finished all requests, exiting.");
     }
 
@@ -180,7 +162,8 @@ public class Client {
         LOGGER = LogManager.getLogger(Client.class);
         String log4jConfigFile = System.getProperty("user.dir") + File.separator + "log4j.properties";
         PropertyConfigurator.configure(log4jConfigFile);
->>>>>>> 86459befee6d1c896fa255618bbbb7a1bdd15fa0
+        LOGGER.info("Finished all requests, exiting.");
     }
+
 }
 

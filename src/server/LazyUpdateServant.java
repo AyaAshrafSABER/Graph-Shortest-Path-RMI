@@ -15,7 +15,7 @@ public class LazyUpdateServant extends UnicastRemoteObject implements GraphServe
     private boolean graphModified;
     private ReadWriteLock rwl = new ReentrantReadWriteLock();
     private Logger logger;
-
+    
     protected LazyUpdateServant(FloydWarshallGraph graph, Logger logger) throws RemoteException {
         super();
         this.graph = graph;
