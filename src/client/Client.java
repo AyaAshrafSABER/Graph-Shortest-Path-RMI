@@ -32,6 +32,7 @@ public class Client {
     private static RandomSleep sleep;
 
     private static void runAuto() throws IOException, NotBoundException {
+        LOGGER.info("Starting client in auto random mode");
         RandomOperationFactory factory = new RandomOperationFactory(pQuery, pAdd, pDel,minOp, maxOp);
         Random randomGenerator = new Random();
         LOGGER.info("Establishing connection with server on: " + rmiURL);
@@ -54,6 +55,7 @@ public class Client {
     }
 
     private static void runFromFile(String filename) throws RemoteException, NotBoundException, MalformedURLException {
+        LOGGER.info("Starting client in file mode, reading requests from " + filename);
         ArrayList<Operation> operations;
         Parser parser = new Parser();
         ArrayList<String> lines = new ArrayList<>();
@@ -85,14 +87,16 @@ public class Client {
     }
 
     private static void runInteractive() throws RemoteException, NotBoundException, MalformedURLException {
+        LOGGER.info("Starting client in Interactive mode");
         Scanner scanner = new Scanner(System.in);
         Parser parser = new Parser();
         LOGGER.info("Establishing connection with server on: " + rmiURL);
         GraphServer service = (GraphServer) Naming.lookup(rmiURL);
         LOGGER.info("Connection successful, starting requests");
+        System.out.println("Enter request in a separate line in the format \"type node1 node2\". Terminate by entering F");
         while (scanner.hasNextLine()) {
             String line = scanner.nextLine();
-            if (line.equals("F")) {
+            if (line.equals("F") || line.equals("f")) {
                 scanner.close();
                 break;
             }
@@ -101,11 +105,6 @@ public class Client {
             Integer result = service.submitOperation(op);
             if (op.getType() == Operation.Type.QUERY)
                 LOGGER.info("response: " + result);
-            try {
-                sleep.sleep(LOGGER);
-            } catch (InterruptedException e) {
-                LOGGER.warn("InterruptedException thrown while sleeping");
-            }
         }
     }
 
@@ -206,8 +205,8 @@ public class Client {
 
         } catch (Exception e) {
             System.out.println("Exception: " + e);
-        } finally {
             LOGGER.fatal("Could not open client properties file");
+        } finally {
             assert inputStream != null;
             inputStream.close();
         }
