@@ -30,9 +30,11 @@ public class LazyUpdateServant extends UnicastRemoteObject implements GraphServe
         if (op.getType() == Operation.Type.QUERY) {
             if (graphModified) {    // TODO: Ensure thread safety
                 rwl.writeLock().lock();
-                this.logger.info("Update triggered, reindexing shortest paths table");
-                graph.computeShortestPaths();
-                graphModified = false;
+                if (graphModified) {
+                    graphModified = false;
+                    this.logger.info("Update triggered, reindexing shortest paths table");
+                    graph.computeShortestPaths();
+                }
                 rwl.writeLock().unlock();
             }
             rwl.readLock().lock();

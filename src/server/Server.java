@@ -1,45 +1,30 @@
 package server;
 
+import graph.FloydWarshallGraph;
+import util.parse.Parser;
 import graph.Graph;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
+import util.sleep.RandomExponentialSleep;
+import util.sleep.RandomUniformSleep;
 
-<<<<<<< HEAD
-import util.parse.Parser;
-
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
-import org.apache.log4j.PropertyConfigurator;
-
-=======
->>>>>>> 86459befee6d1c896fa255618bbbb7a1bdd15fa0
-import java.io.File;
+import java.io.*;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-<<<<<<< HEAD
-
-import java.io.FileNotFoundException;
-import java.util.Scanner;
-
-import java.util.ArrayList;
+import java.util.*;
 
 import static java.lang.System.exit;
-=======
->>>>>>> 86459befee6d1c896fa255618bbbb7a1bdd15fa0
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
 
 public class Server {
-    private  Graph graph;
+    private static FloydWarshallGraph graph;
     private static Logger LOGGER;
+    private static String name;
+    private static int port;
 
     public static void main(String[] args) throws RemoteException {
-<<<<<<< HEAD
         // default options
         String mode = "interactive";
         String filename = "defaultGraph.txt";
@@ -77,10 +62,7 @@ public class Server {
             }
         }
 
-        initLogger();
-        LOGGER.info("Initializing server");
 
-=======
         initLogger();
         LOGGER.info("Initializing server");
         HashMap<Integer, HashSet<Integer>> adjacencyList = new HashMap<>();
@@ -90,21 +72,13 @@ public class Server {
         adjacencyList.put(4, new HashSet<>(Arrays.asList(1)));
         FloydWarshallGraph graph = new FloydWarshallGraph(adjacencyList);
 
->>>>>>> 86459befee6d1c896fa255618bbbb7a1bdd15fa0
         LOGGER.info("Graph processed, starting service");
 
         int port = 5099;
         Registry registry =  LocateRegistry.createRegistry(5099);
-<<<<<<< HEAD
 //        registry.rebind("graphServant", new LazyUpdateServant((parser.constructGraph(lines)), LOGGER));
         registry.rebind("graphServant", new InstantUpdateServant(parser.constructGraph(lines), LOGGER));
-
         LOGGER.info("Service started successfully on port " + port);
-=======
-        registry.rebind("graphServent", new FloydWarshallGraphServant(graph, LOGGER));
-
-        LOGGER.info("Service started successfuly on port " + port);
->>>>>>> 86459befee6d1c896fa255618bbbb7a1bdd15fa0
     }
 
     private static void initLogger() {
@@ -122,5 +96,42 @@ public class Server {
         LOGGER = LogManager.getLogger(Server.class);
         String log4jConfigFile = System.getProperty("user.dir") + File.separator + "log4j.properties";
         PropertyConfigurator.configure(log4jConfigFile);
+    }
+
+    public static void loadConfigs() throws IOException {
+        InputStream inputStream = null;
+        try {
+            Properties prop = new Properties();
+            String propFileName = "client.properties";
+
+            inputStream = new FileInputStream("resources/server.properties");
+//            inputStream = Client.class.getClassLoader().getResourceAsStream(propFileName);
+
+            if (inputStream != null) {
+                prop.load(inputStream);
+            } else {
+                throw new FileNotFoundException("property file '" + propFileName + "' not found in the classpath");
+            }
+
+            name = prop.getProperty("GSP.rmi.registry.name");
+            port = Integer.parseInt(prop.getProperty("GSP.rmi.port"));
+
+            String servantClass = prop.getProperty("GSP.servant.class");
+
+
+            if (servantClass.equals("InstantUpdateServant")) {
+                servant = new InstantUpdateServant(graph, LOGGER);
+            }
+            else if (servantClass.equals("LazyUpdateServant")) {
+                servant = new LazyUpdateServant(graph, LOGGER);
+            }
+
+        } catch (Exception e) {
+            System.out.println("Exception: " + e);
+        } finally {
+            LOGGER.fatal("Could not open client properties file");
+            assert inputStream != null;
+            inputStream.close();
+        }
     }
 }

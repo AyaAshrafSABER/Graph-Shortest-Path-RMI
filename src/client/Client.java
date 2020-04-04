@@ -8,36 +8,37 @@ import server.GraphServer;
 import util.operation.Operation;
 import util.operation.RandomOperationFactory;
 import util.parse.Parser;
+import util.sleep.RandomExponentialSleep;
+import util.sleep.RandomSleep;
 import util.sleep.RandomUniformSleep;
 
-import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 
-import java.util.ArrayList;
+import java.util.*;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-
-import java.util.Random;
-import java.util.Scanner;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class Client {
 
     private static Logger LOGGER;
+    private static String rmiURL;
+    private static double pQuery, pAdd, pDel;
+    private static int minOp, maxOp;
+    private static int minOperationCount, maxOperationCount;
+    private static RandomSleep sleep;
 
-    private static void runAuto(double pQuery, double pAdd)
-            throws RemoteException, NotBoundException, MalformedURLException {
-        RandomOperationFactory factory = new RandomOperationFactory(pQuery, pAdd, 1 - pAdd - pQuery,
-                1, 20);
+    private static void runAuto() throws IOException, NotBoundException {
+        RandomOperationFactory factory = new RandomOperationFactory(pQuery, pAdd, pDel,minOp, maxOp);
         Random randomGenerator = new Random();
-        RandomUniformSleep sleep = new RandomUniformSleep(100, 1000);
-        LOGGER.info("Establishing connection with server");
-        GraphServer service = (GraphServer) Naming.lookup("rmi://localhost:5099/graphServant");
-        LOGGER.info("Connection successful, starting requests");
-        int operationCount = randomGenerator.nextInt(20);
+        LOGGER.info("Establishing connection with server on: " + rmiURL);
+        GraphServer service = (GraphServer) Naming.lookup(rmiURL);
+
+        int operationCount = ThreadLocalRandom.current().nextInt(minOperationCount, maxOperationCount + 1);
+        LOGGER.info("Connection successful, starting requests, request count = "+ operationCount);
         for (int i = 0; i < operationCount; i++) {
             Operation request = factory.getOperation();
             LOGGER.info("request sent: " + request.toString());
@@ -67,9 +68,8 @@ public class Client {
             e.printStackTrace();
         }
         operations = parser.constructOperations(lines);
-        RandomUniformSleep sleep = new RandomUniformSleep(100, 1000);
-        LOGGER.info("Establishing connection with server");
-        GraphServer service = (GraphServer) Naming.lookup("rmi://localhost:5099/graphServant");
+        LOGGER.info("Establishing connection with server on: " + rmiURL);
+        GraphServer service = (GraphServer) Naming.lookup(rmiURL);
         LOGGER.info("Connection successful, starting requests");
         for (Operation op: operations) {
             LOGGER.info("request sent: " + op.toString());
@@ -86,10 +86,9 @@ public class Client {
 
     private static void runInteractive() throws RemoteException, NotBoundException, MalformedURLException {
         Scanner scanner = new Scanner(System.in);
-        RandomUniformSleep sleep = new RandomUniformSleep(100, 1000);
         Parser parser = new Parser();
-        LOGGER.info("Establishing connection with server");
-        GraphServer service = (GraphServer) Naming.lookup("rmi://localhost:5099/graphServant");
+        LOGGER.info("Establishing connection with server on: " + rmiURL);
+        GraphServer service = (GraphServer) Naming.lookup(rmiURL);
         LOGGER.info("Connection successful, starting requests");
         while (scanner.hasNextLine()) {
             String line = scanner.nextLine();
@@ -110,16 +109,16 @@ public class Client {
         }
     }
 
-    public static void main(String[] args) throws RemoteException, NotBoundException, MalformedURLException {
-
+    public static void main(String[] args) throws IOException, NotBoundException {
         initLogger();
         LOGGER.info("Initializing client");
+
+        loadConfigs();
+        LOGGER.info("Configs loaded");
 
         // default options
         String mode = "auto";
         String filename = "defaultRequests.txt";
-        double pQuery = 0.5;
-        double pAdd = 0.2;
 
         if (args.length < 1) {
             System.err.println("The running mode should be specified!\n\t" +
@@ -134,11 +133,7 @@ public class Client {
             }
             runFromFile(filename);
         } else if (mode.equals("auto")) {
-            if (args.length > 2) {
-                pQuery = Double.parseDouble(args[1]);
-                pAdd = Double.parseDouble(args[2]);
-            }
-            runAuto(pQuery, pAdd);
+            runAuto();
         } else {    // input the operations from the standard input.
                 runInteractive();
         }
@@ -160,9 +155,62 @@ public class Client {
         }
 
         LOGGER = LogManager.getLogger(Client.class);
-        String log4jConfigFile = System.getProperty("user.dir") + File.separator + "log4j.properties";
+        String log4jConfigFile = "resources/log4j.properties";
         PropertyConfigurator.configure(log4jConfigFile);
         LOGGER.info("Finished all requests, exiting.");
+    }
+
+    public static void loadConfigs() throws IOException {
+        InputStream inputStream = null;
+        try {
+            Properties prop = new Properties();
+            String propFileName = "client.properties";
+
+            inputStream = new FileInputStream("resources/client.properties");
+//            inputStream = Client.class.getClassLoader().getResourceAsStream(propFileName);
+
+            if (inputStream != null) {
+                prop.load(inputStream);
+            } else {
+                throw new FileNotFoundException("property file '" + propFileName + "' not found in the classpath");
+            }
+
+            // get the property value and print it out
+            String ip = prop.getProperty("GSP.server.ip");
+            String port = prop.getProperty("GSP.server.port");
+            String name = prop.getProperty("GSP.server.registry.name");
+            String sleepClass = prop.getProperty("GSP.client.sleep.class");
+
+            rmiURL = String.format("rmi://%s:%s/%s", ip, port, name);
+            pQuery = Double.parseDouble(prop.getProperty("GSP.client.auto.pQuery"));
+            pAdd = Double.parseDouble(prop.getProperty("GSP.client.auto.pAdd"));
+            pDel = Double.parseDouble(prop.getProperty("GSP.client.auto.pDel"));
+
+            minOp = Integer.parseInt(prop.getProperty("GSP.client.auto.minOp"));
+            maxOp = Integer.parseInt(prop.getProperty("GSP.client.auto.maxOp"));
+
+            minOperationCount = Integer.parseInt(prop.getProperty("GSP.client.auto.minOperationCount"));
+            maxOperationCount = Integer.parseInt(prop.getProperty("GSP.client.auto.maxOperationCount"));
+
+            if (sleepClass.equals("RandomExponentialSleep")) {
+                int mean = Integer.parseInt(prop.getProperty("GSP.client.sleep.mean"));
+                int max = Integer.parseInt(prop.getProperty("GSP.client.sleep.max"));
+                int min = Integer.parseInt(prop.getProperty("GSP.client.sleep.min"));
+                sleep = new RandomExponentialSleep(mean, min, max);
+            }
+            else if (sleepClass.equals("RandomUniformSleep")) {
+                int max = Integer.parseInt(prop.getProperty("GSP.client.sleep.max"));
+                int min = Integer.parseInt(prop.getProperty("GSP.client.sleep.min"));
+                sleep = new RandomUniformSleep( min, max);
+            }
+
+        } catch (Exception e) {
+            System.out.println("Exception: " + e);
+        } finally {
+            LOGGER.fatal("Could not open client properties file");
+            assert inputStream != null;
+            inputStream.close();
+        }
     }
 
 }
