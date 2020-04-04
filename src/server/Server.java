@@ -101,7 +101,7 @@ public class Server {
         }
 
         LOGGER = LogManager.getLogger(Server.class);
-        String log4jConfigFile = "configs/log4j.properties";
+        String log4jConfigFile = "configs/server-log4j.properties";
         PropertyConfigurator.configure(log4jConfigFile);
     }
 
