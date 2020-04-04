@@ -30,13 +30,13 @@ public class Parser {
     }
 
     public Operation parseOperation(String line) {
-        Operation.Type type;
+        Operation.Type type = null;
         String[] parts = line.split("\\s+");
-        if (parts[0].equals("A")) {
+        if (parts[0].equals("A") || parts[0].equals("a")) {
             type = Operation.Type.ADD;
-        } else if (parts[0].equals("D")) {
+        } else if (parts[0].equals("D") || parts[0].equals("d")) {
             type = Operation.Type.DEL;
-        } else {
+        } else if (parts[0].equals("Q") || parts[0].equals("q")){
             type = Operation.Type.QUERY;
         }
         return new Operation(type, Integer.parseInt(parts[1]), Integer.parseInt(parts[2]));

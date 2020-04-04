@@ -15,10 +15,10 @@ public class InstantUpdateServant extends UnicastRemoteObject implements GraphSe
     private ReadWriteLock rwl = new ReentrantReadWriteLock();
     private Logger logger;
 
-    protected InstantUpdateServant(FloydWarshallGraph graph, Logger LOGGER) throws RemoteException {
+    protected InstantUpdateServant(FloydWarshallGraph graph, Logger logger) throws RemoteException {
         super();
         this.graph = graph;
-
+        this.logger = logger;
     }
 
     @Override
