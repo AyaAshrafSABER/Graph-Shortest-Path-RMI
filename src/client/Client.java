@@ -156,7 +156,6 @@ public class Client {
         LOGGER = LogManager.getLogger(Client.class);
         String log4jConfigFile = "resources/log4j.properties";
         PropertyConfigurator.configure(log4jConfigFile);
-        LOGGER.info("Finished all requests, exiting.");
     }
 
     public static void loadConfigs() throws IOException {
