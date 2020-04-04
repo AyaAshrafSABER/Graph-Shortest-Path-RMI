@@ -43,7 +43,11 @@ public class Client {
         for (int i = 0; i < operationCount; i++) {
             Operation request = factory.getOperation();
             LOGGER.info("request sent: " + request.toString());
+            long startTime = System.currentTimeMillis();
             Integer result = service.submitOperation(request);
+            long responseTime = System.currentTimeMillis() - startTime;
+            LOGGER.info("response time: " + responseTime + " ms");
+            LOGGER.warn(responseTime);
             if (request.getType() == Operation.Type.QUERY)
                 LOGGER.info("response: " + result);
             try {
@@ -75,7 +79,11 @@ public class Client {
         LOGGER.info("Connection successful, starting requests");
         for (Operation op: operations) {
             LOGGER.info("request sent: " + op.toString());
+            long startTime = System.currentTimeMillis();
             Integer result = service.submitOperation(op);
+            long responseTime = System.currentTimeMillis() - startTime;
+            LOGGER.info("response time: " + responseTime + " ms");
+            LOGGER.warn(responseTime);
             if (op.getType() == Operation.Type.QUERY)
                 LOGGER.info("response: " + result);
             try {
@@ -102,7 +110,11 @@ public class Client {
             }
             Operation op = parser.parseOperation(line);
             LOGGER.info("request sent: " + op.toString());
+            long startTime = System.currentTimeMillis();
             Integer result = service.submitOperation(op);
+            long responseTime = System.currentTimeMillis() - startTime;
+            LOGGER.info("response time: " + responseTime + " ms");
+            LOGGER.warn(responseTime);
             if (op.getType() == Operation.Type.QUERY)
                 LOGGER.info("response: " + result);
         }
@@ -154,7 +166,7 @@ public class Client {
         }
 
         LOGGER = LogManager.getLogger(Client.class);
-        String log4jConfigFile = "configs/log4j.properties";
+        String log4jConfigFile = "configs/client-log4j.properties";
         PropertyConfigurator.configure(log4jConfigFile);
     }
 
