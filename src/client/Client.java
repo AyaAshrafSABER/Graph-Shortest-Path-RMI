@@ -154,7 +154,7 @@ public class Client {
         }
 
         LOGGER = LogManager.getLogger(Client.class);
-        String log4jConfigFile = "resources/log4j.properties";
+        String log4jConfigFile = "configs/log4j.properties";
         PropertyConfigurator.configure(log4jConfigFile);
     }
 
@@ -164,7 +164,7 @@ public class Client {
             Properties prop = new Properties();
             String propFileName = "client.properties";
 
-            inputStream = new FileInputStream("resources/client.properties");
+            inputStream = new FileInputStream("configs/client.properties");
 //            inputStream = Client.class.getClassLoader().getResourceAsStream(propFileName);
 
             if (inputStream != null) {

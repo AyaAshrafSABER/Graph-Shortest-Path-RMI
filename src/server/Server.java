@@ -101,7 +101,7 @@ public class Server {
         }
 
         LOGGER = LogManager.getLogger(Server.class);
-        String log4jConfigFile = "resources/log4j.properties";
+        String log4jConfigFile = "configs/log4j.properties";
         PropertyConfigurator.configure(log4jConfigFile);
     }
 
@@ -111,7 +111,7 @@ public class Server {
             Properties prop = new Properties();
             String propFileName = "server.properties";
 
-            inputStream = new FileInputStream("resources/" + propFileName);
+            inputStream = new FileInputStream("configs/" + propFileName);
 
             if (inputStream != null) {
                 prop.load(inputStream);
