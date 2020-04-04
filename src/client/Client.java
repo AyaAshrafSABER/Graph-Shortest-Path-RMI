@@ -25,6 +25,7 @@ import java.util.concurrent.ThreadLocalRandom;
 public class Client {
 
     private static Logger LOGGER;
+    private static Logger RESPONSE_LOGGER;
     private static String rmiURL;
     private static double pQuery, pAdd, pDel;
     private static int minOp, maxOp;
@@ -47,7 +48,7 @@ public class Client {
             Integer result = service.submitOperation(request);
             long responseTime = System.currentTimeMillis() - startTime;
             LOGGER.info("response time: " + responseTime + " ms");
-            LOGGER.warn(responseTime);
+            RESPONSE_LOGGER.info(responseTime);
             if (request.getType() == Operation.Type.QUERY)
                 LOGGER.info("response: " + result);
             try {
@@ -83,7 +84,7 @@ public class Client {
             Integer result = service.submitOperation(op);
             long responseTime = System.currentTimeMillis() - startTime;
             LOGGER.info("response time: " + responseTime + " ms");
-            LOGGER.warn(responseTime);
+            RESPONSE_LOGGER.info(responseTime);
             if (op.getType() == Operation.Type.QUERY)
                 LOGGER.info("response: " + result);
             try {
@@ -114,7 +115,7 @@ public class Client {
             Integer result = service.submitOperation(op);
             long responseTime = System.currentTimeMillis() - startTime;
             LOGGER.info("response time: " + responseTime + " ms");
-            LOGGER.warn(responseTime);
+            RESPONSE_LOGGER.info(responseTime);
             if (op.getType() == Operation.Type.QUERY)
                 LOGGER.info("response: " + result);
         }
@@ -166,6 +167,7 @@ public class Client {
         }
 
         LOGGER = LogManager.getLogger(Client.class);
+        RESPONSE_LOGGER = Logger.getLogger("responseLogger");
         String log4jConfigFile = "configs/client-log4j.properties";
         PropertyConfigurator.configure(log4jConfigFile);
     }
