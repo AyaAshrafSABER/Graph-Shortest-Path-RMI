@@ -39,6 +39,10 @@
 # *.iml
 # *.ipr
 
+# Jar manifests
+src/META-INF
+src/server/META-INF
+
 # CMake
 cmake-build-*/
 
