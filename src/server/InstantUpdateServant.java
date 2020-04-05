@@ -9,7 +9,7 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-public class InstantUpdateServant extends UnicastRemoteObject implements GraphServer {
+public class InstantUpdateServant implements GraphServer {
 
     private FloydWarshallGraph graph;
     private ReadWriteLock rwl = new ReentrantReadWriteLock();

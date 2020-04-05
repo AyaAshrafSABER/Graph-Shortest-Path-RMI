@@ -13,9 +13,12 @@ import java.io.*;
 import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import java.rmi.server.UnicastRemoteObject;
 import java.util.*;
 
 import static java.lang.System.exit;
+import static java.lang.System.setOut;
+
 import java.text.SimpleDateFormat;
 
 public class Server {
@@ -74,6 +77,8 @@ public class Server {
 
         LOGGER.info("Initial graph processed, starting service");
 
+        System.setProperty("java.rmi.server.hostname","197.135.206.27");
+
         GraphServer servant = null;
         if (servantClass.equals("InstantUpdateServant")) {
             servant = new InstantUpdateServant(graph, LOGGER);
@@ -81,6 +86,10 @@ public class Server {
         else if (servantClass.equals("LazyUpdateServant")) {
             servant = new LazyUpdateServant(graph, LOGGER);
         }
+
+
+        GraphServer remoteProcessor = (GraphServer) UnicastRemoteObject.exportObject(servant, 9100);
+
 
         Registry registry =  LocateRegistry.createRegistry(port);
         registry.rebind(name, servant);

@@ -10,7 +10,7 @@ import java.rmi.server.UnicastRemoteObject;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-public class LazyUpdateServant extends UnicastRemoteObject implements GraphServer {
+public class LazyUpdateServant implements GraphServer {
     private FloydWarshallGraph graph;
     private boolean graphModified;
     private ReadWriteLock rwl = new ReentrantReadWriteLock();
