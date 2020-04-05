@@ -27,6 +27,7 @@ public class Server {
     private static String name;
     private static int port;
     private static String servantClass;
+    private static String host;
 
     public static void main(String[] args) throws IOException {
         initLogger();
@@ -77,7 +78,7 @@ public class Server {
 
         LOGGER.info("Initial graph processed, starting service");
 
-        System.setProperty("java.rmi.server.hostname","197.135.206.27");
+        System.setProperty("java.rmi.server.hostname", host);
 
         GraphServer servant = null;
         if (servantClass.equals("InstantUpdateServant")) {
@@ -131,6 +132,7 @@ public class Server {
             port = Integer.parseInt(prop.getProperty("GSP.rmi.port"));
             name = prop.getProperty("GSP.rmi.registry.name");
             servantClass = prop.getProperty("GSP.servant.class");
+            host = prop.getProperty("GSP.rmi.host");
 
         } catch (Exception e) {
             LOGGER.fatal("Could not open server properties file");
