@@ -42,6 +42,7 @@
 # Jar manifests
 src/META-INF
 src/server/META-INF
+Results
 
 # CMake
 cmake-build-*/
